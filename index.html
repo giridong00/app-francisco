@@ -1,70 +1,240 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>História - Testes</title>
+<title>Teste Ciências Naturais</title>
+
 <style>
-body { font-family: Arial; margin:0; background:#111; color:white; text-align:center; }
-button { padding:15px; margin:10px; border-radius:10px; border:none; background:#4CAF50; color:white; font-size:18px; }
-#progress { width:90%; margin:20px auto; height:20px; background:#333; border-radius:10px; }
-#bar { height:100%; width:0%; background:#4CAF50; border-radius:10px; }
+body {
+  font-family: 'Segoe UI', Arial;
+  background:#f0f4f8;
+  margin:0;
+}
+
+.container {
+  max-width:700px;
+  margin:auto;
+  padding:20px;
+}
+
+.header {
+  background:#ffffff;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:15px;
+  text-align:center;
+  font-weight:bold;
+  font-size:20px;
+}
+
+.card {
+  background:white;
+  padding:25px;
+  border-radius:15px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.08);
+}
+
+.question {
+  font-size:20px;
+  margin-bottom:20px;
+}
+
+.option {
+  display:block;
+  background:#e3f2fd;
+  border:2px solid transparent;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:10px;
+  cursor:pointer;
+  text-align:left;
+}
+
+.option:hover {
+  background:#bbdefb;
+}
+
+.correct {
+  border-color:green;
+  background:#e8f5e9;
+}
+
+.wrong {
+  border-color:red;
+  background:#ffebee;
+}
+
+.feedback {
+  margin-top:15px;
+  font-size:15px;
+}
+
+button {
+  width:100%;
+  padding:14px;
+  margin-top:15px;
+  border:none;
+  border-radius:10px;
+  background:#1976d2;
+  color:white;
+  font-weight:bold;
+  font-size:16px;
+}
+
+.result {
+  text-align:center;
+  font-size:22px;
+  margin-top:20px;
+}
+
 </style>
 </head>
+
 <body>
 
-<h2>📚 História - Portugal</h2>
-<p id="hora"></p>
+<div class="container">
 
-<div id="progress"><div id="bar"></div></div>
+<div class="header" id="progress"></div>
 
-<div id="quiz"></div>
+<div class="card" id="quizCard">
+<div class="question" id="question"></div>
+<div id="options"></div>
+<div class="feedback" id="feedback"></div>
+<button onclick="next()">Próxima</button>
+</div>
 
-<script src="questions.js"></script>
+<div class="result" id="result"></div>
+<button id="shareBtn" style="display:none;" onclick="share()">Partilhar no Viber</button>
+
+</div>
+
 <script>
-let perguntas = bancoPerguntas.sort(()=>0.5-Math.random()).slice(0,50);
-let index=0, score=0;
 
-function updateHora(){
-document.getElementById("hora").innerText = new Date().toLocaleString();
+// banco simples mas preparado para crescer
+const animals = [
+["peixe","fusiforme","escamas","nadar"],
+["ave","aerodinâmica","penas","voar"],
+["gato","variada","pelos","andar"],
+["cobra","alongada","escamas","rastejar"],
+["rã","compacta","pele húmida","saltar"],
+["tartaruga","oval","carapaça","andar"]
+];
+
+function generateBank(){
+  let bank=[];
+  for(let i=0;i<600;i++){
+    let a = animals[Math.floor(Math.random()*animals.length)];
+    let type = ["forma","revestimento","locomocao"][Math.floor(Math.random()*3)];
+
+    let q,correct,opts,exp;
+
+    if(type==="forma"){
+      q="Qual a forma do "+a[0]+"?";
+      correct=a[1];
+      opts=[a[1],"quadrada","triangular","irregular"];
+      exp="O "+a[0]+" tem forma "+a[1]+" para se adaptar ao ambiente.";
+    }
+
+    if(type==="revestimento"){
+      q="Qual o revestimento do "+a[0]+"?";
+      correct=a[2];
+      opts=[a[2],"pele seca","penas","pelos"];
+      exp="O "+a[0]+" tem "+a[2]+" que protegem o corpo.";
+    }
+
+    if(type==="locomocao"){
+      q="Como se desloca o "+a[0]+"?";
+      correct=a[3];
+      opts=[a[3],"voa","nada","rasteja"];
+      exp="O "+a[0]+" desloca-se a "+a[3]+".";
+    }
+
+    opts.sort(()=>Math.random()-0.5);
+
+    bank.push({
+      question:q,
+      options:opts,
+      correct:opts.indexOf(correct),
+      explanation:exp
+    });
+  }
+  return bank;
 }
-setInterval(updateHora,1000); updateHora();
 
-function render(){
-if(index>=perguntas.length) return finish();
+const bank = generateBank();
+let questions = [];
+let index=0;
+let score=0;
+let answered=false;
 
-let p = perguntas[index];
-let html = "<h3>"+p.q+"</h3>";
-
-p.options.forEach((opt,i)=>{
-html += `<button onclick="responder(${i})">${opt}</button><br>`;
-});
-
-document.getElementById("quiz").innerHTML = html;
-document.getElementById("bar").style.width = (index/50*100)+"%";
+function start(){
+  for(let i=0;i<50;i++){
+    questions.push(bank[Math.floor(Math.random()*bank.length)]);
+  }
+  show();
 }
 
-function responder(i){
-let p = perguntas[index];
-if(i===p.correct){
-score++;
-} else {
-alert("Errado!\nCorreta: "+p.options[p.correct]+"\n"+p.explanation);
+function show(){
+  answered=false;
+  document.getElementById("feedback").innerHTML="";
+  document.getElementById("progress").innerText="Pergunta "+(index+1)+" de 50";
+
+  let q=questions[index];
+  document.getElementById("question").innerText=q.question;
+
+  let html="";
+  q.options.forEach((opt,i)=>{
+    html+=`<div class="option" onclick="answer(${i}, this)">${opt}</div>`;
+  });
+
+  document.getElementById("options").innerHTML=html;
 }
-index++;
-render();
+
+function answer(i,el){
+  if(answered) return;
+  answered=true;
+
+  let q=questions[index];
+
+  if(i===q.correct){
+    score++;
+    el.classList.add("correct");
+    document.getElementById("feedback").innerHTML="✔ Muito bem!";
+  } else {
+    el.classList.add("wrong");
+    document.getElementById("feedback").innerHTML="✘ Atenção: "+q.explanation;
+  }
+}
+
+function next(){
+  if(!answered){alert("Escolhe uma resposta primeiro!"); return;}
+
+  index++;
+  if(index<50){
+    show();
+  } else {
+    finish();
+  }
 }
 
 function finish(){
-let resultado = `Resultado: ${score}/50`;
-document.getElementById("quiz").innerHTML = "<h2>"+resultado+"</h2>";
+  let now=new Date().toLocaleString();
+  let text="Resultado final: "+score+"/50 | "+now;
 
-let link = "viber://forward?text="+encodeURIComponent(resultado);
-window.location.href = link;
+  document.getElementById("quizCard").style.display="none";
+  document.getElementById("result").innerText=text;
+
+  document.getElementById("shareBtn").style.display="block";
+  window.resultText=text;
 }
 
-render();
+function share(){
+  window.location.href="viber://forward?text="+encodeURIComponent(window.resultText);
+}
+
+start();
+
 </script>
 
 </body>
