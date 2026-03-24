@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Teste Ciências</title>
+<script>
+let score = 0;
+
+function check(answer){
+    if(answer === 'correct'){
+        score++;
+        alert('Correto!');
+    } else {
+        alert('Errado!');
+    }
+}
+
+function finish(){
+    alert("Resultado: " + score + "/2");
+}
+</script>
+</head>
+<body>
+
+<h2>Teste Ciências</h2>
+
+<p>1. O peixe vive:</p>
+<button onclick="check('correct')">Na água</button>
+<button onclick="check('wrong')">No ar</button>
+
+<p>2. As aves têm:</p>
+<button onclick="check('correct')">Penas</button>
+<button onclick="check('wrong')">Escamas</button>
+
+<br><br>
+<button onclick="finish()">Finalizar</button>
+
+</body>
+</html>
