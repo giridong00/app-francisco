@@ -1,35 +1,62 @@
+
 <!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="UTF-8">
-<title>Super Testes</title>
 <style>
-body { font-family: Arial; text-align: center; background:#f2f2f2; }
-h1 { margin-top:50px; }
-button {
-    display:block;
-    margin:20px auto;
-    padding:15px;
-    width:200px;
-    font-size:18px;
-    border:none;
-    border-radius:10px;
-    background:#4CAF50;
-    color:white;
-}
+body{font-family:Arial;background:#0f172a;color:white;text-align:center;margin:0}
+button{padding:15px;margin:10px;border-radius:12px;border:none;font-size:18px;background:#22c55e;color:white}
+#bar{height:10px;background:#22c55e;width:0%}
+#progress{width:90%;background:#1e293b;margin:20px auto;border-radius:10px}
 </style>
 </head>
 <body>
 
-<h1>📚 Testes do Francisco</h1>
+<h2>📚 História PRO</h2>
 
-<button onclick="window.location.href='teste1.html'">
-Teste Inglês
-</button>
+<div id="menu">
+<button onclick="start('C1')">C1 - Século XIII</button>
+<button onclick="start('C2')">C2 - Revolução</button>
+</div>
 
-<button onclick="window.location.href='teste2.html'">
-Teste Ciências
-</button>
+<div id="progress"><div id="bar"></div></div>
+<div id="quiz"></div>
+
+<script src="questions.js"></script>
+<script>
+let perguntas=[],i=0,score=0;
+
+function start(cat){
+document.getElementById("menu").style.display="none";
+perguntas=banco[cat].sort(()=>0.5-Math.random()).slice(0,50);
+render();
+}
+
+function render(){
+if(i>=50)return finish();
+let p=perguntas[i];
+let html="<h3>"+p.q+"</h3>";
+p.options.forEach((o,idx)=>{
+html+=`<button onclick="ans(${idx})">${o}</button><br>`;
+});
+document.getElementById("quiz").innerHTML=html;
+document.getElementById("bar").style.width=(i/50*100)+"%";
+}
+
+function ans(x){
+let p=perguntas[i];
+if(x===p.correct){score++}
+else alert("Errado!\nCorreta: "+p.options[p.correct]+"\n"+p.explanation);
+i++;render();
+}
+
+function finish(){
+let res="Resultado: "+score+"/50";
+document.getElementById("quiz").innerHTML="<h2>"+res+"</h2>";
+window.location.href="viber://forward?text="+encodeURIComponent(res);
+}
+</script>
 
 </body>
 </html>
